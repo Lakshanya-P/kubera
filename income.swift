@@ -1,97 +1,64 @@
 import SwiftUI
 
 struct IncomeView: View {
-    
+
     @Binding var items: [BudgetItem]
     @Binding var mainBalance: Double
     @Binding var savingsBalance: Double
-    
+
     @State private var incomeTitle = ""
     @State private var incomeAmountText = ""
-    
+
+    private var canAdd: Bool {
+        !incomeTitle.isEmpty && (Double(incomeAmountText) ?? 0) > 0
+    }
+
     var body: some View {
         ZStack {
-            Image("background2")
-                .resizable()
-                .scaledToFill()
-                .ignoresSafeArea()
-            
-            ScrollView {
-                VStack(spacing: 20) {
-                    
-                    Text("Add Income")
-                        .font(.largeTitle)
-                        .bold()
-                        .foregroundColor(.black)
-                        .padding(.top, 40)
-                    
-                    VStack(spacing: 15) {
-                        ZStack(alignment: .leading) {
-                            if incomeTitle.isEmpty {
-                                Text("Income Source")
-                                    .foregroundColor(Color.black.opacity(0.7))
-                                    .padding(.leading, 12)
-                            }
-                            TextField("", text: $incomeTitle)
-                                .padding()
-                                .background(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .fill(Color.white.opacity(0.6))
-                                )
-                                .foregroundColor(.black)
-                                .accentColor(.black)
-                        }
-                        
-                        ZStack(alignment: .leading) {
-                            if incomeAmountText.isEmpty {
-                                Text("Amount")
-                                    .foregroundColor(Color.black.opacity(0.7))
-                                    .padding(.leading, 12)
-                            }
-                            TextField("", text: $incomeAmountText)
-                                .keyboardType(.decimalPad)
-                                .padding()
-                                .background(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .fill(Color.white.opacity(0.6))
-                                )
-                                .foregroundColor(.black)
-                                .accentColor(.black)
-                        }
-                    }
-                    .padding()
-                    .background(Color.white.opacity(0.25))
-                    .cornerRadius(16)
-                    .padding(.horizontal)
-                    
-                    Button(action: {
-                        addIncome()
-                    }) {
+            AppBackground(image: "background2")
+
+            CenteredScrollView(maxWidth: 640) {
+                VStack(spacing: Theme.Space.l) {
+
+                    VStack(spacing: Theme.Space.xs) {
+                        Image(systemName: "dollarsign.circle.fill")
+                            .font(.system(size: 48))
+                            .foregroundStyle(Theme.secondary)
                         Text("Add Income")
-                            .bold()
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.green.opacity(0.85))
-                            .foregroundColor(.white)
-                            .cornerRadius(12)
+                            .font(.largeTitle.weight(.heavy))
+                            .foregroundStyle(Theme.ink)
+                        Text("Balance: \(mainBalance, format: .currency(code: "USD"))")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Theme.ink.opacity(0.6))
                     }
-                    .padding(.horizontal)
-                    .frame(maxWidth:350)
-                    
-                    Spacer(minLength: 50)
+                    .padding(.top, Theme.Space.m)
+
+                    VStack(spacing: Theme.Space.s) {
+                        KidTextField(placeholder: "Income source (e.g. Allowance)", text: $incomeTitle)
+                        KidTextField(placeholder: "Amount", text: $incomeAmountText, keyboard: .decimal)
+
+                        Button("Add Income") { addIncome() }
+                            .buttonStyle(PrimaryButtonStyle(fill: Theme.secondary, icon: "plus"))
+                            .disabled(!canAdd)
+                            .opacity(canAdd ? 1 : 0.5)
+                            .tutorialAnchor("in.add")
+                    }
+                    .card()
+                    .tutorialAnchor("in.card")
                 }
             }
         }
         .navigationTitle("Income")
+        .coachMarks(.income)
     }
-    
+
     func addIncome() {
         guard let amount = Double(incomeAmountText),
               amount > 0,
               !incomeTitle.isEmpty else { return }
-        
+
         mainBalance += amount
-        
+
         items.append(
             BudgetItem(
                 title: incomeTitle,
@@ -99,7 +66,7 @@ struct IncomeView: View {
                 category: .deposit
             )
         )
-        
+
         incomeTitle = ""
         incomeAmountText = ""
     }

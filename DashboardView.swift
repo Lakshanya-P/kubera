@@ -1,135 +1,108 @@
 import SwiftUI
 
 struct DashboardView: View {
-    
+
     @Binding var items: [BudgetItem]
     @Binding var mainBalance: Double
     @Binding var savingsBalance: Double
     @Binding var goals: [Goal]
-    
-    @State private var showTutorialSheet = false
-    
-    private let columns = [
-        GridItem(.flexible()),
-        GridItem(.flexible())
-    ]
-    
+
+    @State private var showTutorial = false
+
     var body: some View {
         ZStack {
-            Image("background3")
-                .resizable()
-                .scaledToFill()
-                .edgesIgnoringSafeArea(.all)
-            
-            ScrollView {
-                VStack(spacing: 40) {
-                    Text("Your Financial Dashboard")
-                        .font(.title2)
-                        .bold()
-                        .foregroundColor(.black)
-                    
-                    Button {
-                        showTutorialSheet = true
-                    } label: {
-                        HStack {
-                            Image(systemName: "play.fill")
-                                .foregroundColor(.black)
-                            Text("Tutorial")
-                                .bold()
-                                .foregroundColor(.black)
-                        }
-                        .frame(maxWidth: 110)
-                        .padding()
-                        .background(Color.fromHex("#308cc9"))
-                        .cornerRadius(12)
+            AppBackground(image: "background3")
+
+            CenteredScrollView {
+                VStack(spacing: Theme.Space.m) {
+
+                    Text("Your Dashboard")
+                        .font(.title2.weight(.heavy))
+                        .foregroundStyle(Theme.ink)
+
+                    // MARK: - Balance chip
+                    HStack(spacing: 6) {
+                        Text("Balance")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Theme.ink.opacity(0.6))
+                        Text(mainBalance, format: .currency(code: "USD"))
+                            .font(.title3.weight(.heavy))
+                            .foregroundStyle(mainBalance >= 0 ? Theme.secondary : Theme.coral)
                     }
-                    .sheet(isPresented: $showTutorialSheet) {
-                        TutorialSheetView2()
-                    }
-                    
-                    LazyVGrid(columns: columns, spacing: 20) {
-                        DashboardIconButton(
-                            title: "Banking Basics",
-                            systemIcon: "banknote",
-                            destination: BankingBasicsView()
-                        )
-                        
-                        DashboardIconButton(
-                            title: "View Transactions",
-                            systemIcon: "list.bullet",
-                            destination: BudgetView(
-                                items: $items,
-                                mainBalance: $mainBalance,
-                                savingsBalance: $savingsBalance
-                            )
-                        )
-                        
-                        DashboardIconButton(
-                            title: "Spendings",
-                            systemIcon: "cart.fill",
-                            destination: TransactionsView(
-                                items: $items,
-                                mainBalance: $mainBalance,
-                                savingsBalance: $savingsBalance
-                            )
-                        )
-                        
-                        DashboardIconButton(
-                            title: "Income",
-                            systemIcon: "dollarsign.circle",
-                            destination: IncomeView(
-                                items: $items,
-                                mainBalance: $mainBalance,
-                                savingsBalance: $savingsBalance
-                            )
-                        )
-                    }
-                    .padding(.horizontal)
-                    
-                    HStack {
-                        DashboardIconButton(
-                            title: "Saving Goals",
-                            systemIcon: "target",
-                            destination: GoalsView(
-                                items: $items,
-                                mainBalance: $mainBalance,
-                                goals: $goals
-                            )
-                        )
-                        .frame(width: 200) // fixed width for centering
-                    }
+                    .padding(.vertical, 10)
                     .frame(maxWidth: .infinity)
-                    .padding(.top, 10)
-                    
+                    .background(.white.opacity(0.9), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+
+                    // MARK: - Module grid (2 columns, matching the tutorial)
+                    LazyVGrid(columns: [GridItem(.flexible(), spacing: Theme.Space.s),
+                                        GridItem(.flexible(), spacing: Theme.Space.s)],
+                              spacing: Theme.Space.s) {
+                        DashboardTile(title: "Banking Basics", icon: "banknote.fill", color: Theme.primary) {
+                            BankingBasicsView()
+                        }
+                        .tutorialAnchor("dash.banking")
+                        DashboardTile(title: "Transactions", icon: "list.bullet.rectangle.fill", color: Theme.purple) {
+                            BudgetView(items: $items, mainBalance: $mainBalance, savingsBalance: $savingsBalance)
+                        }
+                        .tutorialAnchor("dash.transactions")
+                        DashboardTile(title: "Spending", icon: "cart.fill", color: Theme.coral) {
+                            TransactionsView(items: $items, mainBalance: $mainBalance, savingsBalance: $savingsBalance)
+                        }
+                        .tutorialAnchor("dash.spending")
+                        DashboardTile(title: "Income", icon: "dollarsign.circle.fill", color: Theme.secondary) {
+                            IncomeView(items: $items, mainBalance: $mainBalance, savingsBalance: $savingsBalance)
+                        }
+                        .tutorialAnchor("dash.income")
+                        DashboardTile(title: "Investment", icon: "chart.line.uptrend.xyaxis", color: Theme.teal) {
+                            InvestmentView()
+                        }
+                        .tutorialAnchor("dash.investment")
+                        DashboardTile(title: "Saving Goals", icon: "target", color: Theme.accent) {
+                            GoalsView(items: $items, mainBalance: $mainBalance, goals: $goals)
+                        }
+                        .tutorialAnchor("dash.goals")
+                    }
+
+                    Button {
+                        showTutorial = true
+                    } label: {
+                        Text("Replay Tutorial")
+                    }
+                    .buttonStyle(PrimaryButtonStyle(fill: Theme.ink.opacity(0.85), icon: "play.fill"))
+                    .fullCover(isPresented: $showTutorial) {
+                        TutorialFlowView(mode: .dashboard)
+                    }
                 }
-                .padding()
             }
         }
         .navigationTitle("Dashboard")
+        .inlineNavigationTitle()
     }
 }
 
-struct DashboardIconButton<Destination: View>: View {
+// MARK: - Dashboard Tile
+
+struct DashboardTile<Destination: View>: View {
     let title: String
-    let systemIcon: String
-    let destination: Destination
-    
+    let icon: String
+    let color: Color
+    @ViewBuilder var destination: () -> Destination
+
     var body: some View {
         NavigationLink(destination: destination) {
             VStack(spacing: 8) {
-                Image(systemName: systemIcon)
-                    .font(.system(size: 30))
-                    .foregroundColor(.black)
-                
+                Image(systemName: icon)
+                    .font(.system(size: 32, weight: .semibold))
                 Text(title)
-                    .bold()
+                    .font(.headline)
                     .multilineTextAlignment(.center)
             }
-            .frame(maxWidth: .infinity, minHeight: 76)
-            .padding()
-            .background(Color.fromHex("#308cc9"))
-            .foregroundColor(.black)
-            .cornerRadius(12)
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity, minHeight: 120)
+            .padding(Theme.Space.m)
+            .background(color, in: RoundedRectangle(cornerRadius: Theme.corner, style: .continuous))
+            .shadow(color: color.opacity(0.35), radius: 10, y: 6)
         }
+        .buttonStyle(.plain)
     }
 }

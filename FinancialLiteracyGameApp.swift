@@ -47,6 +47,8 @@ struct FinancialLiteracyGameApp: App {
                     goals: $goals
                 )
             }
+            .fontDesign(.rounded)
+            .tint(Theme.primary)
         }
     }
 }

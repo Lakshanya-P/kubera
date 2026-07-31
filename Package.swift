@@ -8,14 +8,16 @@ import PackageDescription
 import AppleProductTypes
 
 let package = Package(
-    name: "Financial Literacy Game",
+    name: "Kubera",
     platforms: [
         .iOS("18.1")
     ],
     products: [
         .iOSApplication(
-            name: "Financial Literacy Game",
+            name: "Kubera",
             targets: ["AppModule"],
+            bundleIdentifier: "com.lakshanya.kubera",
+            teamIdentifier: "3J4W77RQVR",
             displayVersion: "1.0",
             bundleVersion: "1",
             appIcon: .placeholder(icon: .coins),

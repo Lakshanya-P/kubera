@@ -3,103 +3,106 @@ import SwiftUI
 // MARK: - Main View
 
 struct BankingBasicsView: View {
-    
-    @State private var showTutorialSheet = false
-    
+
+    @State private var selection = 0
+
+    // Bitmask of completed lessons (for the "Completed" badges).
+    @AppStorage("bankDoneMask") private var doneMask = 0
+
+    private let lessons: [(title: String, lesson: LessonType, color: Color, icon: String)] = [
+        ("Banking Basics", .lesson1, Theme.primary, "building.columns.fill"),
+        ("Saving & Goals", .lesson2, Theme.secondary, "target"),
+        ("Budgeting & Debit Cards", .lesson3, Theme.purple, "creditcard.fill"),
+        ("Advanced Banking", .lesson4, Theme.coral, "chart.line.uptrend.xyaxis")
+    ]
+
+    private func isDone(_ number: Int) -> Bool { doneMask & (1 << (number - 1)) != 0 }
+
     var body: some View {
-        ZStack{
-            Image("background4") 
-                .resizable()
-                .scaledToFill()
-                .edgesIgnoringSafeArea(.all)
-            
-            NavigationStack {
-                VStack(spacing: 20) {
-                    
-                    Text("Banking Lessons!")
-                        .font(.largeTitle)
-                        .bold()
+        ZStack {
+            AppBackground(image: "background4")
+
+            GeometryReader { geo in
+                VStack(spacing: Theme.Space.m) {
+
+                    Text("Banking Lessons")
+                        .font(.title.weight(.heavy))
                         .multilineTextAlignment(.center)
-                        .padding(.top)
-                        .foregroundColor(.black)
-                    
-                    // Two-column grid for lessons
-                    let columns = [
-                        GridItem(.flexible(), spacing: 20),
-                        GridItem(.flexible(), spacing: 20)
-                    ]
-                    
-                    LazyVGrid(columns: columns, spacing: 20) {
-                        
-                        NavigationLink(destination: LessonView(lesson: .lesson1)) {
-                            LessonButton(title: "Lesson 1: Banking Basics", color: Color.fromHex("#4281f5"))
-                                .frame(maxWidth: .infinity, minHeight: 120) // fill space
+                        .foregroundStyle(Theme.ink)
+
+                    // Swipeable slideshow — about a quarter of the screen tall.
+                    TabView(selection: $selection) {
+                        ForEach(lessons.indices, id: \.self) { i in
+                            lessonSlide(lessons[i])
+                                .padding(.horizontal, Theme.Space.xs)
+                                .tag(i)
                         }
-                        
-                        NavigationLink(destination: LessonView(lesson: .lesson2)) {
-                            LessonButton(title: "Lesson 2: Saving & Goals", color: Color.fromHex("#34c796"))
-                                .frame(maxWidth: .infinity, minHeight: 120)
-                        }
-                        
-                        NavigationLink(destination: LessonView(lesson: .lesson3)) {
-                            LessonButton(title: "Lesson 3: Budgeting & Debit Cards", color: Color.fromHex("#5ae0c1"))
-                                .frame(maxWidth: .infinity, minHeight: 120)
-                        }
-                        
-                        NavigationLink(destination: LessonView(lesson: .lesson4)) {
-                            LessonButton(title: "Lesson 4: Advanced Banking", color: Color.fromHex("#42b8fc"))
-                                .frame(maxWidth: .infinity, minHeight: 120)
-                        }
-                        
-                        
-                        
                     }
-                    .padding()
-                    
-                    Button {
-                        showTutorialSheet = true
-                    } label: {
-                        HStack {
-                            Image(systemName: "play.fill")
-                                .foregroundColor(.white)
-                            Text(" Tutorial?")
-                                .bold()
-                                .foregroundColor(.white)
-                        }
-                        .frame(maxWidth: 200)
-                        .padding()
-                        .background(Color.fromHex("#27ab8c"))
-                        .cornerRadius(12)
-                    }
-                    .sheet(isPresented: $showTutorialSheet) {
-                        TutorialSheetView1()
-                    }
-                    .frame(maxHeight: .infinity) // fill remaining vertical space
-                    
-                    Spacer()
+                    .tabViewStyle(.page(indexDisplayMode: .always))
+                    .frame(height: max(geo.size.height * 0.25, 190))
+                    .tutorialAnchor("banking.lessons")
+
+                    Text("Swipe to see all four lessons")
+                        .font(.footnote)
+                        .foregroundStyle(Theme.ink.opacity(0.5))
                 }
+                .frame(maxWidth: 640)
+                .frame(maxWidth: .infinity)
                 .padding()
+                .frame(minHeight: geo.size.height)
             }
         }
+        .navigationTitle("Banking")
+        .inlineNavigationTitle()
+        .coachMarks(.banking)
     }
-}
 
-// MARK: - Lesson Button
+    private func lessonSlide(_ item: (title: String, lesson: LessonType, color: Color, icon: String)) -> some View {
+        let number = item.lesson.number
+        let done = isDone(number)
+        return VStack(spacing: Theme.Space.s) {
+            HStack(spacing: Theme.Space.s) {
+                ZStack {
+                    Circle().fill(.white.opacity(0.25)).frame(width: 48, height: 48)
+                    Image(systemName: item.icon)
+                        .font(.system(size: 24, weight: .semibold))
+                        .foregroundStyle(.white)
+                }
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Lesson \(number)")
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(.white.opacity(0.9))
+                    Text(item.title)
+                        .font(.title3.weight(.heavy))
+                        .foregroundStyle(.white)
+                        .lineLimit(2)
+                }
+                Spacer(minLength: 0)
+                if done {
+                    Image(systemName: "checkmark.seal.fill")
+                        .font(.title3)
+                        .foregroundStyle(.white)
+                }
+            }
 
-struct LessonButton: View {
-    let title: String
-    let color: Color
-    
-    var body: some View {
-        Text(title)
-            .font(.title3.bold())
-            .foregroundColor(.white)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .padding()
-            .background(color)
-            .cornerRadius(15)
-            .shadow(radius: 5)
-            .multilineTextAlignment(.center)
+            Spacer(minLength: 0)
+
+            NavigationLink {
+                LessonView(lesson: item.lesson)
+            } label: {
+                Text(done ? "Review Lesson" : "Start Lesson")
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(item.color)
+                    .frame(maxWidth: .infinity, minHeight: 44)
+                    .background(.white, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(Theme.Space.m)
+        .padding(.bottom, Theme.Space.m)   // room for the page dots
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(item.color, in: RoundedRectangle(cornerRadius: Theme.corner, style: .continuous))
+        .shadow(color: item.color.opacity(0.35), radius: 10, y: 6)
     }
 }
 
@@ -107,7 +110,7 @@ struct LessonButton: View {
 
 enum LessonType {
     case lesson1, lesson2, lesson3, lesson4
-    
+
     var slides: [Slide] {
         switch self {
         case .lesson1: return LessonContent.lesson1
@@ -116,51 +119,65 @@ enum LessonType {
         case .lesson4: return LessonContent.lesson4
         }
     }
+
+    var number: Int {
+        switch self {
+        case .lesson1: return 1
+        case .lesson2: return 2
+        case .lesson3: return 3
+        case .lesson4: return 4
+        }
+    }
 }
 
 // MARK: - Lesson View with Next Button
 
 struct LessonView: View {
-    
+
     let lesson: LessonType
     @State private var currentIndex = 0
     @Environment(\.dismiss) private var dismiss
-    
+
+    @AppStorage("bankDoneMask") private var doneMask = 0
+    @AppStorage("bankLastCompleted") private var lastCompleted = 0
+
+    private var isLastSlide: Bool { currentIndex >= lesson.slides.count - 1 }
+
     var body: some View {
-        VStack(spacing: 20) {
-            
-            ProgressView(value: Double(currentIndex + 1),
-                         total: Double(lesson.slides.count))
-            .padding()
-            
-            // Display current slide
-            SlideView(slide: lesson.slides[currentIndex])
-                .animation(.easeInOut, value: currentIndex)
-                .transition(.slide)
-            
-            Spacer()
-            
-            // Next / Finish button
-            Button(action: {
-                if currentIndex < lesson.slides.count - 1 {
-                    currentIndex += 1
-                } else {
-                    dismiss()
+        ZStack {
+            AppBackground(image: "background4")
+
+            VStack(spacing: Theme.Space.m) {
+
+                ProgressView(value: Double(currentIndex + 1), total: Double(lesson.slides.count))
+                    .tint(Theme.primary)
+
+                SlideView(slide: lesson.slides[currentIndex])
+                    .id(currentIndex)
+                    .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .opacity))
+
+                Button {
+                    if isLastSlide {
+                        completeLesson()
+                    } else {
+                        withAnimation(.easeInOut) { currentIndex += 1 }
+                    }
+                } label: {
+                    Text(isLastSlide ? "Finish 🎉" : "Next")
                 }
-            }) {
-                Text(currentIndex < lesson.slides.count - 1 ? "Next ➡️" : "Finish ✅")
-                    .bold()
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(12)
+                .buttonStyle(PrimaryButtonStyle(fill: isLastSlide ? Theme.secondary : Theme.primary))
             }
-            .padding(.horizontal)
+            .responsiveWidth()
+            .padding()
         }
-        .padding()
         .navigationTitle("Lesson")
-        .navigationBarTitleDisplayMode(.inline)
+        .inlineNavigationTitle()
+    }
+
+    private func completeLesson() {
+        doneMask |= (1 << (lesson.number - 1))
+        lastCompleted = lesson.number
+        dismiss()
     }
 }
 
@@ -168,7 +185,7 @@ struct LessonView: View {
 // MARK: - Lesson Content
 
 struct LessonContent {
-    
+
     // Lesson 1: Banking Basics
     static let lesson1: [Slide] = [
         Slide(
@@ -221,17 +238,17 @@ Budgeting is key: Track your income and plan your spending carefully.
         Slide(
             title: "Summary & Tips",
             content: """
-✅ Banks keep your money safe  
-✅ Checking accounts = everyday spending  
-✅ Savings accounts = grow your money  
-✅ Always monitor your transactions  
+✅ Banks keep your money safe
+✅ Checking accounts = everyday spending
+✅ Savings accounts = grow your money
+✅ Always monitor your transactions
 ✅ Budget and save consistently
 """,
             imageName: "piggyBank",
             game: nil
         )
     ]
-    
+
     // Lesson 2: Saving & Goals
     static let lesson2: [Slide] = [
         Slide(
@@ -246,8 +263,8 @@ Start small—even saving $1 a day makes a difference over time.
         Slide(
             title: "Needs vs Wants",
             content: """
-Needs are essential for survival—like food, shelter, and clothing.  
-Wants are extras that make life fun—like toys, candy, or games.  
+Needs are essential for survival—like food, shelter, and clothing.
+Wants are extras that make life fun—like toys, candy, or games.
 Understanding this helps you prioritize your spending.
 """,
             imageName: "needsVsWants",
@@ -256,7 +273,7 @@ Understanding this helps you prioritize your spending.
         Slide(
             title: "Setting Goals",
             content: """
-Set realistic goals for what you want to save for: short-term (toys), medium-term (bike), long-term (college).  
+Set realistic goals for what you want to save for: short-term (toys), medium-term (bike), long-term (college).
 Track your progress regularly and celebrate milestones!
 """,
             imageName: "goals",
@@ -268,7 +285,7 @@ Track your progress regularly and celebrate milestones!
         Slide(
             title: "Interest Matters",
             content: """
-Banks can pay interest on your savings—extra money just for keeping it there!  
+Banks can pay interest on your savings—extra money just for keeping it there!
 Even small interest rates add up over time thanks to compounding.
 """,
             imageName: "interest",
@@ -280,23 +297,23 @@ Even small interest rates add up over time thanks to compounding.
         Slide(
             title: "Summary & Tips",
             content: """
-✅ Save regularly  
-✅ Prioritize needs over wants  
-✅ Set achievable goals  
-✅ Learn about interest and compounding  
+✅ Save regularly
+✅ Prioritize needs over wants
+✅ Set achievable goals
+✅ Learn about interest and compounding
 ✅ Celebrate progress!
 """,
             imageName: "piggyBankFull",
             game: nil
         )
     ]
-    
+
     // Lesson 3: Budgeting & Debit Cards
     static let lesson3: [Slide] = [
         Slide(
             title: "What is a Debit Card?",
             content: """
-A debit card lets you spend the money in your checking account safely.  
+A debit card lets you spend the money in your checking account safely.
 It’s convenient, secure, and helps you track spending digitally.
 """,
             imageName: "debitCard",
@@ -305,7 +322,7 @@ It’s convenient, secure, and helps you track spending digitally.
         Slide(
             title: "Creating a Budget",
             content: """
-A budget is a plan for your money: track income, expenses, and savings.  
+A budget is a plan for your money: track income, expenses, and savings.
 Use categories: needs, wants, and savings. Adjust as your goals change.
 """,
             imageName: "budgetPlan",
@@ -318,7 +335,7 @@ Use categories: needs, wants, and savings. Adjust as your goals change.
         Slide(
             title: "Spending Wisely",
             content: """
-Always compare prices, avoid impulse buys, and pay attention to recurring expenses.  
+Always compare prices, avoid impulse buys, and pay attention to recurring expenses.
 Smart spending protects your savings and helps reach goals faster.
 """,
             imageName: "shopping",
@@ -330,23 +347,23 @@ Smart spending protects your savings and helps reach goals faster.
         Slide(
             title: "Summary & Tips",
             content: """
-✅ Debit cards are safe and convenient  
-✅ Track all spending  
-✅ Categorize income and expenses  
-✅ Stick to your budget  
+✅ Debit cards are safe and convenient
+✅ Track all spending
+✅ Categorize income and expenses
+✅ Stick to your budget
 ✅ Adjust as goals change
 """,
             imageName: "wallet",
             game: nil
         )
     ]
-    
+
     // Lesson 4: Advanced Banking
     static let lesson4: [Slide] = [
         Slide(
             title: "Credit vs Debit",
             content: """
-Debit is your money. Credit is borrowed money that must be paid back with interest.  
+Debit is your money. Credit is borrowed money that must be paid back with interest.
 Use credit wisely to avoid debt.
 """,
             imageName: "creditVsDebit",
@@ -359,7 +376,7 @@ Use credit wisely to avoid debt.
         Slide(
             title: "Compound Interest",
             content: """
-Compound interest is earning money on your money AND on interest it has earned.  
+Compound interest is earning money on your money AND on interest it has earned.
 It helps savings grow faster over time.
 """,
             imageName: "compoundInterest",
@@ -371,7 +388,7 @@ It helps savings grow faster over time.
         Slide(
             title: "Financial Safety",
             content: """
-Always monitor accounts, use strong passwords, and avoid sharing sensitive info.  
+Always monitor accounts, use strong passwords, and avoid sharing sensitive info.
 Fraud prevention is an important skill for everyone!
 """,
             imageName: "security",
@@ -380,10 +397,10 @@ Fraud prevention is an important skill for everyone!
         Slide(
             title: "Summary & Tips",
             content: """
-✅ Debit vs credit understanding  
-✅ Use compound interest to your advantage  
-✅ Keep accounts secure  
-✅ Track spending and saving  
+✅ Debit vs credit understanding
+✅ Use compound interest to your advantage
+✅ Keep accounts secure
+✅ Track spending and saving
 ✅ Stay financially literate!
 """,
             imageName: "savingsGoals",

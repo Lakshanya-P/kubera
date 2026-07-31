@@ -1,114 +1,111 @@
 import SwiftUI
 
 struct TransactionsView: View {
-    
+
     @Binding var items: [BudgetItem]
     @Binding var mainBalance: Double
     @Binding var savingsBalance: Double
-    
+
     @State private var title = ""
     @State private var amountText = ""
     @State private var category: BudgetItem.Category = .food
-    
+
     @State private var showAlert = false
-    
+
+    private var canAdd: Bool {
+        !title.isEmpty && (Double(amountText) ?? 0) > 0
+    }
+
+    private var spendingCategories: [BudgetItem.Category] {
+        BudgetItem.Category.allCases.filter { $0 != .deposit }
+    }
+
     var body: some View {
         ZStack {
-            Image("background1")
-                .resizable()
-                .scaledToFill()
-                .ignoresSafeArea()
-            
-            ScrollView {
-                VStack(spacing: 20) {
-                    
-                    Text("Add Expense")
-                        .font(.largeTitle)
-                        .bold()
-                        .foregroundColor(.black)
-                    
-                    VStack(spacing: 15) {
-                        
-                        ZStack(alignment: .leading) {
-                            if title.isEmpty {
-                                Text("Title")
-                                    .foregroundColor(.black.opacity(0.7))
-                                    .padding(.leading, 12)
-                            }
-                            
-                            TextField("", text: $title)
-                                .padding()
-                                .background(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .fill(Color.white.opacity(0.6))
-                                )
-                                .foregroundColor(.black)
-                                .accentColor(.black)
-                        }
-                        
-                        ZStack(alignment: .leading) {
-                            if amountText.isEmpty {
-                                Text("Amount")
-                                    .foregroundColor(.black.opacity(0.7))
-                                    .padding(.leading, 12)
-                            }
-                            
-                            TextField("", text: $amountText)
-                                .keyboardType(.decimalPad)
-                                .padding()
-                                .background(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .fill(Color.white.opacity(0.6))
-                                )
-                                .foregroundColor(.black)
-                                .accentColor(.black)
-                        }
-                        
-                        Picker("Category", selection: $category) {
-                            ForEach(BudgetItem.Category.allCases.filter { $0 != .deposit }, id: \.self) { cat in
-                                Text(cat.rawValue)
-                            }
-                        }
-                        .pickerStyle(.segmented)
-                        .padding()
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.white.opacity(0.6))
-                        )
+            AppBackground(image: "background1")
+
+            CenteredScrollView(maxWidth: 640) {
+                VStack(spacing: Theme.Space.l) {
+
+                    VStack(spacing: Theme.Space.xs) {
+                        Image(systemName: "cart.fill")
+                            .font(.system(size: 48))
+                            .foregroundStyle(Theme.coral)
+                        Text("Add Spending")
+                            .font(.largeTitle.weight(.heavy))
+                            .foregroundStyle(Theme.ink)
+                        Text("Balance: \(mainBalance, format: .currency(code: "USD"))")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Theme.ink.opacity(0.6))
                     }
-                    .padding()
-                    .background(Color.white.opacity(0.25))
-                    .cornerRadius(16)
-                    
-                    Button("Add Expense") {
-                        addTransaction()
+                    .padding(.top, Theme.Space.m)
+
+                    VStack(spacing: Theme.Space.s) {
+                        KidTextField(placeholder: "What did you buy?", text: $title)
+                        KidTextField(placeholder: "Amount", text: $amountText, keyboard: .decimal)
+
+                        // Category chips — wrap nicely on any width
+                        VStack(alignment: .leading, spacing: Theme.Space.xs) {
+                            Text("Category")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(Theme.ink.opacity(0.6))
+                            LazyVGrid(columns: Theme.adaptiveColumns(minWidth: 110, spacing: Theme.Space.xs), spacing: Theme.Space.xs) {
+                                ForEach(spendingCategories) { cat in
+                                    categoryChip(cat)
+                                }
+                            }
+                        }
+
+                        Button("Add Spending") { addTransaction() }
+                            .buttonStyle(PrimaryButtonStyle(fill: Theme.coral, icon: "minus"))
+                            .disabled(!canAdd)
+                            .opacity(canAdd ? 1 : 0.5)
+                            .tutorialAnchor("sp.add")
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(Color.green.opacity(0.85))
-                    
-                    Spacer(minLength: 50)
+                    .card()
+                    .tutorialAnchor("sp.card")
                 }
-                .padding()
             }
         }
-        .navigationTitle("Spendings")
+        .navigationTitle("Spending")
         .alert("Insufficient Funds", isPresented: $showAlert) {
             Button("OK", role: .cancel) {}
+        } message: {
+            Text("You don't have enough balance for this purchase. Try adding income first!")
         }
+        .coachMarks(.spending)
     }
-    
+
+    private func categoryChip(_ cat: BudgetItem.Category) -> some View {
+        let selected = category == cat
+        return Button {
+            category = cat
+        } label: {
+            Text(cat.rawValue)
+                .font(.subheadline.weight(.semibold))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+                .background(
+                    selected ? cat.color : Color.fromHex("#F1F5FB"),
+                    in: Capsule()
+                )
+                .foregroundStyle(selected ? .white : Theme.ink)
+        }
+        .buttonStyle(.plain)
+    }
+
     func addTransaction() {
         guard let amount = Double(amountText),
               amount > 0,
               !title.isEmpty else { return }
-        
+
         if mainBalance < amount {
             showAlert = true
             return
         }
-        
+
         mainBalance -= amount
-        
+
         items.append(
             BudgetItem(
                 title: title,
@@ -116,7 +113,7 @@ struct TransactionsView: View {
                 category: category
             )
         )
-        
+
         title = ""
         amountText = ""
     }
