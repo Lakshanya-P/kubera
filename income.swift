@@ -50,6 +50,7 @@ struct IncomeView: View {
         }
         .navigationTitle("Income")
         .coachMarks(.income)
+        .keyboardDoneButton()
     }
 
     func addIncome() {

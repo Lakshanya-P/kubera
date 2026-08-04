@@ -37,10 +37,6 @@ struct DashboardView: View {
                     LazyVGrid(columns: [GridItem(.flexible(), spacing: Theme.Space.s),
                                         GridItem(.flexible(), spacing: Theme.Space.s)],
                               spacing: Theme.Space.s) {
-                        DashboardTile(title: "Banking Basics", icon: "banknote.fill", color: Theme.primary) {
-                            BankingBasicsView()
-                        }
-                        .tutorialAnchor("dash.banking")
                         DashboardTile(title: "Transactions", icon: "list.bullet.rectangle.fill", color: Theme.purple) {
                             BudgetView(items: $items, mainBalance: $mainBalance, savingsBalance: $savingsBalance)
                         }
@@ -53,14 +49,18 @@ struct DashboardView: View {
                             IncomeView(items: $items, mainBalance: $mainBalance, savingsBalance: $savingsBalance)
                         }
                         .tutorialAnchor("dash.income")
-                        DashboardTile(title: "Investment", icon: "chart.line.uptrend.xyaxis", color: Theme.teal) {
-                            InvestmentView()
-                        }
-                        .tutorialAnchor("dash.investment")
                         DashboardTile(title: "Saving Goals", icon: "target", color: Theme.accent) {
                             GoalsView(items: $items, mainBalance: $mainBalance, goals: $goals)
                         }
                         .tutorialAnchor("dash.goals")
+                        DashboardTile(title: "Banking Basics", icon: "banknote.fill", color: Theme.primary) {
+                            BankingBasicsView()
+                        }
+                        .tutorialAnchor("dash.banking")
+                        DashboardTile(title: "Investment", icon: "chart.line.uptrend.xyaxis", color: Theme.teal) {
+                            InvestmentView()
+                        }
+                        .tutorialAnchor("dash.investment")
                     }
 
                     Button {

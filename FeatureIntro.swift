@@ -21,46 +21,50 @@ struct CoachTour {
 
 extension CoachTour {
     static let banking = CoachTour(id: "banking", color: Theme.primary, steps: [
-        CoachStep(anchor: "banking.lessons", title: "Pick a lesson",
-                  text: "Swipe left or right to see all four lessons, then tap Start. Each one has a fun mini-game!")
+        CoachStep(anchor: "banking.lessons", title: "Learn & earn! 📚",
+                  text: "Four lessons that teach REAL banking skills — terms, accounts, budgeting, credit, and more."),
+        CoachStep(anchor: "banking.lessons", title: "🐯 Earn Tiger Stripes!",
+                  text: "Complete a lesson at a new difficulty level to earn 1 stripe. Stripes are awarded only once per difficulty — harder difficulty = new stripe! Invest them in the Tiger Market."),
+        CoachStep(anchor: "banking.lessons", title: "Age-based difficulty 🎓",
+                  text: "Lessons automatically get harder as you get older! Answer every question correctly to advance — no skipping!")
     ])
     static let transactions = CoachTour(id: "transactions", color: Theme.purple, steps: [
-        CoachStep(anchor: "tx.balance", title: "Your balance",
-                  text: "This shows how much money you have right now."),
-        CoachStep(anchor: "tx.chart", title: "Where it goes",
-                  text: "This chart shows what you spend your money on."),
-        CoachStep(anchor: "tx.list", title: "Your history",
-                  text: "Every time you earn or spend, it shows up in this list.")
+        CoachStep(anchor: "tx.balance", title: "Your REAL balance 💵",
+                  text: "This shows your actual money — not tiger stripes. Log every deposit and purchase here to stay on top of your real finances."),
+        CoachStep(anchor: "tx.chart", title: "Spending chart 📊",
+                  text: "See your spending broken down by category. Patterns appear fast — knowing WHERE money goes is the first step to budgeting well!"),
+        CoachStep(anchor: "tx.list", title: "Full history 📜",
+                  text: "Every dollar in and every dollar out, recorded here. Review it regularly to catch mistakes and stay on budget.")
     ])
     static let spending = CoachTour(id: "spending", color: Theme.coral, steps: [
-        CoachStep(anchor: "sp.card", title: "Add what you bought",
-                  text: "Type what you bought, the price, and pick a category like food or fun."),
-        CoachStep(anchor: "sp.add", title: "Track your spending",
-                  text: "Then tap here — I'll subtract it from your balance.")
+        CoachStep(anchor: "sp.card", title: "Log real spending 🛒",
+                  text: "Every time you spend REAL money — on food, fun, clothes, anything — log it here. This is how budgeters stay in control!"),
+        CoachStep(anchor: "sp.add", title: "Tap to deduct ➖",
+                  text: "Enter the amount and category, then tap to subtract from your real balance. Honest tracking = smarter spending decisions.")
     ])
     static let income = CoachTour(id: "income", color: Theme.secondary, steps: [
-        CoachStep(anchor: "in.card", title: "Add your money",
-                  text: "Type where the money came from and how much you got."),
-        CoachStep(anchor: "in.add", title: "Grow your balance",
-                  text: "Tap here to add it to your balance!")
+        CoachStep(anchor: "in.card", title: "Add real income 💵",
+                  text: "Got allowance, a gift, or earned money from a job or chore? Add it here! This is your REAL money, not tiger stripes."),
+        CoachStep(anchor: "in.add", title: "Grow your balance ➕",
+                  text: "Tap to add it and watch your real balance grow. Every dollar tracked here helps you budget smarter and save more!")
     ])
     static let investment = CoachTour(id: "investment", color: Theme.teal, steps: [
-        CoachStep(anchor: "inv.header", title: "Your net worth",
-                  text: "You start with 100 stripes. This is your net worth — it grows as your stocks rise!"),
-        CoachStep(anchor: "inv.market", title: "Trending stocks",
-                  text: "These are the 5 most popular stocks right now. Tap any one to buy or sell shares."),
-        CoachStep(anchor: "inv.seeall", title: "Find any company",
-                  text: "Tap “See all” to open every stock and search — even by the real company name, like “Netflix”!"),
-        CoachStep(anchor: "inv.market", title: "Trends & the 1-day rule",
-                  text: "In the buy window you can view a stock's trend over a week, month, or year. Remember: you must hold a stock for 1 whole day before you can sell it — no super-fast trading!"),
-        CoachStep(anchor: "inv.leaderboard", title: "Climb the leaderboard",
-                  text: "Grow your net worth and race the other players to the top. Buy low, sell high!")
+        CoachStep(anchor: "inv.header", title: "🐯 Stripes = game points!",
+                  text: "Tiger stripes are NOT real money — they're your game currency, earned from completing banking lessons. Invest them here to practice real investing skills risk-free!"),
+        CoachStep(anchor: "inv.market", title: "Trending stocks 🔥",
+                  text: "The 5 hottest stocks right now. Prices rise and fall like real markets! Tap any stock to buy or sell with your stripes."),
+        CoachStep(anchor: "inv.seeall", title: "Browse all companies 🔎",
+                  text: "Tap 'See all' to search 30+ tiger-themed companies based on real ones. Search by real name — try 'Apple' or 'Netflix'!"),
+        CoachStep(anchor: "inv.market", title: "Read trends + 1-day rule ⏳",
+                  text: "Tap any stock to view week, month, or year price charts. After buying, you must hold for 1 day before selling — just like real investing!"),
+        CoachStep(anchor: "inv.leaderboard", title: "Race to #1! 🏆",
+                  text: "Your net worth = stripes + value of your stocks. Buy low, sell high, and climb the leaderboard. Every decision teaches you real investing strategy!")
     ])
     static let goals = CoachTour(id: "goals", color: Theme.accent, steps: [
-        CoachStep(anchor: "goal.display", title: "Track your goals",
-                  text: "Your goals and their progress rings show up here as you save."),
-        CoachStep(anchor: "goal.new", title: "Make a goal",
-                  text: "Name something you're saving for and set how much you need.")
+        CoachStep(anchor: "goal.display", title: "Real saving goals 🎯",
+                  text: "Set a REAL money goal — a new phone, a trip, a gift. Watch the progress ring fill as you save toward it. Visual goals get reached faster!"),
+        CoachStep(anchor: "goal.new", title: "Create a goal ✨",
+                  text: "Name it and set a dollar target. Every time you add income, you can allocate some toward this goal. Small consistent amounts add up to big results!")
     ])
 }
 
@@ -104,41 +108,42 @@ private struct CoachOverlay: View {
                 }
 
                 callout
-                    .frame(maxWidth: 520)
+                    .frame(maxWidth: 560)
                     .padding(Theme.Space.m)
                     .frame(maxWidth: .infinity, maxHeight: .infinity,
                            alignment: calloutAtTop ? .top : .bottom)
             }
         }
+        .onAppear { speech.speak(narration) }
+        .onChange(of: index) { _, _ in speech.speak(narration) }
     }
 
     private var callout: some View {
         VStack(spacing: Theme.Space.s) {
             HStack(alignment: .top, spacing: Theme.Space.s) {
                 Image("tiger")
-                    .resizable().scaledToFit().frame(width: 52, height: 52)
+                    .resizable().scaledToFit().frame(width: 60, height: 60)
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(step.title).font(.headline).foregroundStyle(Theme.ink)
+                    Text(step.title).font(.title3.weight(.heavy)).foregroundStyle(Theme.ink)
                     Text(step.text)
-                        .font(.subheadline).foregroundStyle(Theme.ink.opacity(0.75))
+                        .font(.title3)
+                        .foregroundStyle(Theme.ink.opacity(0.8))
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer(minLength: 0)
             }
 
             HStack {
-                Button {
-                    speech.toggleSpeech(for: narration)
-                } label: {
-                    Label(speech.isSpeaking ? "Pause" : "Read aloud",
-                          systemImage: speech.isSpeaking ? "pause.fill" : "speaker.wave.2.fill")
+                Button { toggleAudio() } label: {
+                    Label(speech.isSpeaking ? "Pause" : "Play",
+                          systemImage: speech.isSpeaking ? "pause.fill" : "play.fill")
                 }
-                .font(.subheadline)
+                .font(.headline)
                 .tint(tour.color)
                 Spacer()
                 Button("Skip") { onFinish() }
-                    .font(.subheadline)
+                    .font(.headline)
                     .foregroundStyle(Theme.ink.opacity(0.6))
             }
 
@@ -149,8 +154,8 @@ private struct CoachOverlay: View {
                         withAnimation { index -= 1 }
                     } label: {
                         Label("Back", systemImage: "chevron.left")
-                            .font(.headline)
-                            .frame(maxWidth: .infinity, minHeight: 46)
+                            .font(.title3.weight(.bold))
+                            .frame(maxWidth: .infinity, minHeight: 52)
                     }
                     .buttonStyle(.bordered)
                     .tint(Theme.ink.opacity(0.5))
@@ -160,15 +165,22 @@ private struct CoachOverlay: View {
                     if isLast { onFinish() } else { withAnimation { index += 1 } }
                 } label: {
                     Text(isLast ? "Got it! 🎉" : "Next")
+                        .font(.title3.weight(.bold))
                 }
                 .buttonStyle(PrimaryButtonStyle(fill: tour.color))
             }
 
             Text("Step \(index + 1) of \(tour.steps.count)")
-                .font(.caption)
+                .font(.footnote.weight(.semibold))
                 .foregroundStyle(Theme.ink.opacity(0.5))
         }
         .card(padding: Theme.Space.m)
+    }
+
+    private func toggleAudio() {
+        if speech.isSpeaking { speech.pause() }
+        else if speech.isPaused { speech.resume() }
+        else { speech.speak(narration) }
     }
 }
 

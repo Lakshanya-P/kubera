@@ -9,6 +9,7 @@ struct SurveyView: View {
 
     @AppStorage("survey_name") private var name: String = ""
     @AppStorage("survey_age") private var age: Int = 13
+    @AppStorage("survey_birthYear") private var birthYear: Int = Calendar.current.component(.year, from: Date()) - 13
     @AppStorage("survey_hasChecking") private var hasCheckingAccountStored: Bool?
 
     var body: some View {
@@ -16,6 +17,7 @@ struct SurveyView: View {
             AppBackground(image: "background2")
 
             CenteredScrollView(maxWidth: 640) {
+
                 VStack(spacing: Theme.Space.l) {
 
                     // MARK: About You
@@ -57,6 +59,17 @@ struct SurveyView: View {
             }
         }
         .navigationTitle("Your Information")
+        .keyboardDoneButton()
+        .onAppear {
+            let year = Calendar.current.component(.year, from: Date())
+            if UserDefaults.standard.object(forKey: "survey_birthYear") == nil {
+                birthYear = year - age
+            }
+        }
+        .onChange(of: age) { _, newAge in
+            let year = Calendar.current.component(.year, from: Date())
+            birthYear = year - newAge
+        }
     }
 
     var canContinue: Bool {

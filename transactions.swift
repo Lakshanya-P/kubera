@@ -74,6 +74,7 @@ struct TransactionsView: View {
             Text("You don't have enough balance for this purchase. Try adding income first!")
         }
         .coachMarks(.spending)
+        .keyboardDoneButton()
     }
 
     private func categoryChip(_ cat: BudgetItem.Category) -> some View {

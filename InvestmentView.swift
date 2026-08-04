@@ -500,6 +500,7 @@ private struct UsernameGateView: View {
             }
         }
         .interactiveDismissDisabled(true)
+        .keyboardDoneButton()
     }
 
     private var intro: some View {
@@ -510,9 +511,9 @@ private struct UsernameGateView: View {
                 .foregroundStyle(Theme.ink)
 
             VStack(alignment: .leading, spacing: Theme.Space.s) {
-                bullet("creditcard.fill", "You start with 100 stripes to invest.")
+                bullet("creditcard.fill", "Get 100 tiger stripes — game points, not real money!")
                 bullet("chart.line.uptrend.xyaxis", "Buy tiger stocks — prices rise and fall live.")
-                bullet("trophy.fill", "Grow your net worth and climb the leaderboard!")
+                bullet("trophy.fill", "Compete and play with friends on the leaderboard!")
             }
 
             Button("Next") { withAnimation { step = 1 } }

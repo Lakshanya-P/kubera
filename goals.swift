@@ -72,6 +72,7 @@ struct GoalsView: View {
             Text(alertMessage)
         }
         .coachMarks(.goals)
+        .keyboardDoneButton()
     }
 
     // MARK: - Goal display

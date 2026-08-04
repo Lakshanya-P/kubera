@@ -62,6 +62,7 @@ struct TutorialFlowView: View {
     @AppStorage("hasCompletedTutorial") private var hasCompletedTutorial = false
     @AppStorage("survey_name") private var name = ""
     @AppStorage("survey_age") private var age = 13
+    @AppStorage("survey_birthYear") private var birthYear = Calendar.current.component(.year, from: Date()) - 13
     @AppStorage("survey_hasChecking") private var hasChecking: Bool?
 
     @StateObject private var speech = SpeechManager()
@@ -69,60 +70,60 @@ struct TutorialFlowView: View {
 
     // Tiles shown on the dashboard tour (mirrors the real dashboard).
     private let tourTiles: [(title: String, icon: String, color: Color, id: String)] = [
-        ("Banking Basics", "banknote.fill", Theme.primary, "dash.banking"),
         ("Transactions", "list.bullet.rectangle.fill", Theme.purple, "dash.transactions"),
         ("Spending", "cart.fill", Theme.coral, "dash.spending"),
         ("Income", "dollarsign.circle.fill", Theme.secondary, "dash.income"),
-        ("Investment", "chart.line.uptrend.xyaxis", Theme.teal, "dash.investment"),
-        ("Saving Goals", "target", Theme.accent, "dash.goals")
+        ("Saving Goals", "target", Theme.accent, "dash.goals"),
+        ("Banking Basics", "banknote.fill", Theme.primary, "dash.banking"),
+        ("Investment", "chart.line.uptrend.xyaxis", Theme.teal, "dash.investment")
     ]
 
     private var allPages: [TutorialPage] {
         [
-            TutorialPage(title: "Hi, I'm Kubera!",
-                         text: "I'll be your money guide. Let me get to know you, then show you around the app. You can skip anytime.",
+            TutorialPage(title: "Hi, I'm Kubera! 🐯",
+                         text: "I'm your money guide. First, tell me about you!",
                          icon: "hand.wave.fill", color: Theme.primary),
             TutorialPage(title: "What's your name?",
-                         text: "Tell me your name so I can make this app feel like yours.",
+                         text: "Pick a fun name — I'll make this app yours!",
                          icon: "person.fill", color: Theme.secondary, field: .name),
             TutorialPage(title: "How old are you?",
-                         text: "This helps me share tips that fit you best.",
+                         text: "This helps me pick the right tips for you.",
                          icon: "calendar", color: Theme.purple, field: .age),
-            TutorialPage(title: "Do you have a checking account?",
-                         text: "No worries either way — it just helps me know where to start.",
+            TutorialPage(title: "Have a bank account?",
+                         text: "No worries either way!",
                          icon: "building.columns.fill", color: Theme.primary, field: .checking),
-            TutorialPage(title: "Finding your Dashboard",
-                         text: "This is your home screen. Tap “Your Dashboard” to open your money hub — that's where we're headed next!",
+            TutorialPage(title: "Find your Dashboard",
+                         text: "Tap “Your Dashboard” to open your money hub!",
                          icon: "hand.point.up.left.fill", color: Theme.purple, scene: .home("home.dashboard")),
-            TutorialPage(title: "This is your Dashboard",
-                         text: "Your home base! Every feature lives here as a colorful tile. Let me show you each one.",
+            TutorialPage(title: "Your Dashboard 🏠",
+                         text: "Four tiles manage your REAL money. Two tiles let you practice investing with tiger stripes. You're in charge of both!",
                          icon: "square.grid.2x2.fill", color: Theme.primary, scene: .dashboard(nil)),
-            TutorialPage(title: "Banking Basics",
-                         text: "Four fun lessons teach you how banking, saving, budgeting, and credit work — with mini-games.",
-                         icon: "banknote.fill", color: Theme.primary, scene: .dashboard("dash.banking")),
-            TutorialPage(title: "Transactions",
-                         text: "See your balance and a chart of where your money goes, plus every deposit and purchase.",
+            TutorialPage(title: "Transactions 📊",
+                         text: "Track your REAL balance, view a spending chart, and see every dollar in and out. Knowing your numbers is the first step to budgeting!",
                          icon: "list.bullet.rectangle.fill", color: Theme.purple, scene: .dashboard("dash.transactions")),
-            TutorialPage(title: "Spending",
-                         text: "Bought something? Add it here and pick a category. I'll subtract it from your balance.",
+            TutorialPage(title: "Spending 🛒",
+                         text: "Log every real purchase here — food, fun, clothes, anything! Honest tracking is how smart budgeters stay in control of real money.",
                          icon: "cart.fill", color: Theme.coral, scene: .dashboard("dash.spending")),
-            TutorialPage(title: "Income",
-                         text: "Earned money, like allowance? Add it here to grow your balance.",
+            TutorialPage(title: "Income 💵",
+                         text: "Add real money you earn or receive — allowance, gifts, jobs! Every dollar logged here grows your real balance.",
                          icon: "dollarsign.circle.fill", color: Theme.secondary, scene: .dashboard("dash.income")),
-            TutorialPage(title: "Investment",
-                         text: "Investing puts your money to work so it can grow over time. Tap here to learn how!",
-                         icon: "chart.line.uptrend.xyaxis", color: Theme.teal, scene: .dashboard("dash.investment")),
-            TutorialPage(title: "Saving Goals",
-                         text: "Set a goal like a new bike, then watch your progress ring fill as you save.",
+            TutorialPage(title: "Saving Goals 🎯",
+                         text: "Set a REAL savings goal — a phone, a bike, a trip. Watch the ring fill as you save. Visual goals get reached faster!",
                          icon: "target", color: Theme.accent, scene: .dashboard("dash.goals")),
-            TutorialPage(title: "Heading back home",
-                         text: "Done exploring? Tap the back arrow at the top-left to return to the home screen.",
+            TutorialPage(title: "Banking Lessons 📚",
+                         text: "Learn real banking skills — accounts, interest, credit, taxes, and more! Complete lessons to earn 🐯 tiger stripes. Lessons get harder as you get older!",
+                         icon: "banknote.fill", color: Theme.primary, scene: .dashboard("dash.banking")),
+            TutorialPage(title: "Tiger Stripes 🐯",
+                         text: "Stripes are GAME POINTS — not real money! Earn them by completing banking lessons, then invest them in the Tiger Market to practice real investing skills safely.",
+                         icon: "chart.line.uptrend.xyaxis", color: Theme.teal, scene: .dashboard("dash.investment")),
+            TutorialPage(title: "Go back home ⬅️",
+                         text: "Tap the back arrow to return home.",
                          icon: "arrow.uturn.left", color: Theme.primary, scene: .dashboard("dash.back")),
-            TutorialPage(title: "Your Personal Info",
-                         text: "Back on the home screen, tap “Personal Information” anytime to see the details you shared with me.",
+            TutorialPage(title: "Your Info 🪪",
+                         text: "Tap “Personal Information” to see your details.",
                          icon: "person.text.rectangle.fill", color: Theme.secondary, scene: .home("home.personal")),
-            TutorialPage(title: "You're all set!",
-                         text: "That's the tour. Have fun becoming a Money Master!",
+            TutorialPage(title: "You're all set! 🎉",
+                         text: "Have fun becoming a Money Master!",
                          icon: "checkmark.seal.fill", color: Theme.secondary)
         ]
     }
@@ -158,6 +159,19 @@ struct TutorialFlowView: View {
             default:
                 cardScene
             }
+        }
+        .onAppear {
+            speech.speak(narration)
+            // Initialise birth year if missing (e.g. first launch after update).
+            let year = Calendar.current.component(.year, from: Date())
+            if UserDefaults.standard.object(forKey: "survey_birthYear") == nil {
+                birthYear = year - age
+            }
+        }
+        .onChange(of: index) { _, _ in speech.speak(narration) }
+        .onChange(of: age) { _, newAge in
+            let year = Calendar.current.component(.year, from: Date())
+            birthYear = year - newAge
         }
     }
 
@@ -206,21 +220,21 @@ struct TutorialFlowView: View {
                 .accessibilityHidden(true)
 
             ZStack {
-                Circle().fill(page.color.opacity(0.15)).frame(width: 48, height: 48)
+                Circle().fill(page.color.opacity(0.15)).frame(width: 60, height: 60)
                 Image(systemName: page.icon)
-                    .font(.system(size: 22, weight: .semibold))
+                    .font(.system(size: 28, weight: .semibold))
                     .foregroundStyle(page.color)
             }
 
             Text(page.title)
-                .font(.title3.weight(.heavy))
+                .font(.title.weight(.heavy))
                 .multilineTextAlignment(.center)
                 .foregroundStyle(Theme.ink)
 
             Text(page.text)
-                .font(.subheadline)
+                .font(.title3)
                 .multilineTextAlignment(.center)
-                .foregroundStyle(Theme.ink.opacity(0.75))
+                .foregroundStyle(Theme.ink.opacity(0.8))
 
             readAloudButton
 
@@ -382,11 +396,11 @@ struct TutorialFlowView: View {
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(page.title)
-                        .font(.headline)
+                        .font(.title3.weight(.heavy))
                         .foregroundStyle(Theme.ink)
                     Text(page.text)
-                        .font(.subheadline)
-                        .foregroundStyle(Theme.ink.opacity(0.75))
+                        .font(.title3)
+                        .foregroundStyle(Theme.ink.opacity(0.8))
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer(minLength: 0)
@@ -396,7 +410,7 @@ struct TutorialFlowView: View {
                 readAloudButton
                 Spacer()
                 Button("Skip") { finish() }
-                    .font(.subheadline)
+                    .font(.headline)
                     .foregroundStyle(Theme.ink.opacity(0.6))
             }
 
@@ -411,10 +425,13 @@ struct TutorialFlowView: View {
 
     private var readAloudButton: some View {
         Button {
-            speech.toggleSpeech(for: narration)
+            if speech.isSpeaking { speech.pause() }
+            else if speech.isPaused { speech.resume() }
+            else { speech.speak(narration) }
         } label: {
-            Label(speech.isSpeaking ? "Pause" : "Read aloud",
-                  systemImage: speech.isSpeaking ? "pause.fill" : "speaker.wave.2.fill")
+            Label(speech.isSpeaking ? "Pause" : "Play",
+                  systemImage: speech.isSpeaking ? "pause.fill" : "play.fill")
+                .font(.headline)
         }
         .buttonStyle(.bordered)
         .tint(page.color)
@@ -428,8 +445,8 @@ struct TutorialFlowView: View {
                     withAnimation { index -= 1 }
                 } label: {
                     Label("Back", systemImage: "chevron.left")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity, minHeight: 50)
+                        .font(.title3.weight(.bold))
+                        .frame(maxWidth: .infinity, minHeight: 52)
                 }
                 .buttonStyle(.bordered)
                 .tint(Theme.ink.opacity(0.5))
@@ -440,6 +457,7 @@ struct TutorialFlowView: View {
                 if isLast { finish() } else { withAnimation { index += 1 } }
             } label: {
                 Text(isLast ? "Finish 🎉" : "Next")
+                    .font(.title3.weight(.bold))
             }
             .buttonStyle(PrimaryButtonStyle(fill: page.color))
         }
@@ -453,13 +471,7 @@ struct TutorialFlowView: View {
         case .name:
             KidTextField(placeholder: "Your name", text: $name)
         case .age:
-            VStack(spacing: Theme.Space.xs) {
-                Text("\(age)")
-                    .font(.system(size: 34, weight: .heavy, design: .rounded))
-                    .foregroundStyle(page.color)
-                Stepper("Age", value: $age, in: 4...100)
-                    .labelsHidden()
-            }
+            AgePicker(age: $age, color: page.color)
         case .checking:
             HStack(spacing: Theme.Space.s) {
                 choice(title: "Yes", value: true)
@@ -505,7 +517,7 @@ struct ProfileView: View {
     @AppStorage("survey_age") private var age = 13
     @AppStorage("survey_hasChecking") private var hasChecking: Bool?
 
-    @State private var showTutorial = false
+    @State private var showEdit = false
 
     private var checkingText: String {
         guard let hasChecking else { return "Not set yet" }
@@ -542,14 +554,14 @@ struct ProfileView: View {
                     }
                     .card()
 
-                    Button("Update my info") { showTutorial = true }
+                    Button("Update my info") { showEdit = true }
                         .buttonStyle(PrimaryButtonStyle(fill: Theme.primary, icon: "pencil"))
                 }
             }
         }
         .navigationTitle("Personal Information")
-        .fullCover(isPresented: $showTutorial) {
-            TutorialFlowView()
+        .sheet(isPresented: $showEdit) {
+            EditInfoView()
         }
     }
 
@@ -568,6 +580,108 @@ struct ProfileView: View {
                 .foregroundStyle(Theme.ink.opacity(0.7))
         }
         .padding(.vertical, Theme.Space.s)
+    }
+}
+
+// MARK: - Age picker (big, obvious +/- control)
+
+struct AgePicker: View {
+    @Binding var age: Int
+    var color: Color = Theme.purple
+
+    var body: some View {
+        HStack(spacing: Theme.Space.l) {
+            Button { if age > 4 { age -= 1 } } label: {
+                Image(systemName: "minus.circle.fill").font(.system(size: 46))
+            }
+            .buttonStyle(.plain)
+
+            Text("\(age)")
+                .font(.system(size: 46, weight: .heavy, design: .rounded))
+                .frame(minWidth: 72)
+                .foregroundStyle(Theme.ink)
+
+            Button { if age < 100 { age += 1 } } label: {
+                Image(systemName: "plus.circle.fill").font(.system(size: 46))
+            }
+            .buttonStyle(.plain)
+        }
+        .foregroundStyle(color)
+    }
+}
+
+// MARK: - Edit info (direct editing, no tutorial)
+
+struct EditInfoView: View {
+
+    @AppStorage("survey_name") private var name = ""
+    @AppStorage("survey_age") private var age = 13
+    @AppStorage("survey_birthYear") private var birthYear = Calendar.current.component(.year, from: Date()) - 13
+    @AppStorage("survey_hasChecking") private var hasChecking: Bool?
+
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                AppBackground(image: "background2")
+
+                CenteredScrollView(maxWidth: 560) {
+                    VStack(spacing: Theme.Space.l) {
+
+                        VStack(alignment: .leading, spacing: Theme.Space.s) {
+                            SectionTitle("Your name")
+                            KidTextField(placeholder: "Enter your name", text: $name)
+                        }
+                        .card()
+
+                        VStack(spacing: Theme.Space.s) {
+                            SectionTitle("Your age")
+                            AgePicker(age: $age, color: Theme.purple)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .card()
+
+                        VStack(alignment: .leading, spacing: Theme.Space.s) {
+                            SectionTitle("Do you have a bank account?")
+                            HStack(spacing: Theme.Space.s) {
+                                choice(title: "Yes", value: true)
+                                choice(title: "No", value: false)
+                            }
+                        }
+                        .card()
+                    }
+                }
+            }
+            .navigationTitle("Edit your info")
+            .inlineNavigationTitle()
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }.fontWeight(.bold)
+                }
+            }
+            .keyboardDoneButton()
+            .onChange(of: age) { _, newAge in
+                let year = Calendar.current.component(.year, from: Date())
+                birthYear = year - newAge
+            }
+        }
+    }
+
+    private func choice(title: String, value: Bool) -> some View {
+        let selected = hasChecking == value
+        return Button {
+            hasChecking = value
+        } label: {
+            Text(title)
+                .font(.headline)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(selected ? Theme.primary : Color.fromHex("#F1F5FB"),
+                            in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .foregroundStyle(selected ? .white : Theme.ink)
+        }
+        .buttonStyle(.plain)
     }
 }
 

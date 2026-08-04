@@ -72,3 +72,30 @@ extension View {
         #endif
     }
 }
+
+// MARK: - Keyboard helpers
+
+#if os(iOS)
+func hideKeyboard() {
+    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+}
+#endif
+
+extension View {
+    /// Adds a "Done" button above the keyboard so number pads (which have no
+    /// return key) can always be dismissed to reveal what's underneath.
+    @ViewBuilder
+    func keyboardDoneButton() -> some View {
+        #if os(iOS)
+        toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") { hideKeyboard() }
+                    .fontWeight(.bold)
+            }
+        }
+        #else
+        self
+        #endif
+    }
+}

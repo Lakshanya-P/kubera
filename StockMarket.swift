@@ -12,6 +12,24 @@ enum MarketConfig {
     static let startingStripes: Double = 100
 }
 
+/// Stripes earned from banking lessons wait here until the market next loads,
+/// then get added to the player's balance.
+enum StripeBank {
+    private static let key = "pendingStripeReward"
+
+    static func grant(_ amount: Double) {
+        let d = UserDefaults.standard
+        d.set(d.double(forKey: key) + amount, forKey: key)
+    }
+
+    static func claimPending() -> Double {
+        let d = UserDefaults.standard
+        let v = d.double(forKey: key)
+        if v != 0 { d.set(0, forKey: key) }
+        return v
+    }
+}
+
 // MARK: - Stocks (tiger-punny replicas of real companies)
 
 struct Stock: Identifiable, Hashable {
@@ -211,6 +229,9 @@ final class MarketStore: ObservableObject {
     private var ticks = 0
     private var loop: Task<Void, Never>?
 
+    // Local mirror key: always saved on every buy/sell so data survives network outages.
+    private let mirrorKey = "market_localMirror"
+
     init() {
         // Stable per-install id.
         let defaults = UserDefaults.standard
@@ -224,9 +245,16 @@ final class MarketStore: ObservableObject {
 
         let username = defaults.string(forKey: "market_username")
         let display = (username?.isEmpty == false) ? username! : "Player"
-        record = PortfolioRecord(displayName: display,
-                                 stripes: MarketConfig.startingStripes,
-                                 shares: [:])
+
+        // Start with local mirror so the UI is populated immediately — no async flash.
+        if let data = defaults.data(forKey: "market_localMirror"),
+           let cached = try? JSONDecoder().decode(PortfolioRecord.self, from: data) {
+            record = cached
+        } else {
+            record = PortfolioRecord(displayName: display,
+                                     stripes: MarketConfig.startingStripes,
+                                     shares: [:])
+        }
 
         backend = MarketConfig.backendURL.map { FirebaseRESTBackend(base: $0) } ?? LocalBackend()
     }
@@ -334,14 +362,32 @@ final class MarketStore: ObservableObject {
 
     private func persist() {
         let snapshot = record
+        // Always mirror locally so data survives network outages and app restarts.
+        if let data = try? JSONEncoder().encode(snapshot) {
+            UserDefaults.standard.set(data, forKey: mirrorKey)
+        }
         Task { try? await backend.save(userId: userId, record: snapshot) }
     }
 
     private func load() async {
         if let saved = try? await backend.load(userId: userId) {
             record = saved
+            // Mirror the freshly-loaded remote data locally.
+            if let data = try? JSONEncoder().encode(saved) {
+                UserDefaults.standard.set(data, forKey: mirrorKey)
+            }
+        } else if let data = UserDefaults.standard.data(forKey: mirrorKey),
+                  let cached = try? JSONDecoder().decode(PortfolioRecord.self, from: data) {
+            // Network unavailable — fall back to the local mirror, don't overwrite with defaults.
+            record = cached
         } else {
-            persist()   // first run: register this player
+            persist()   // first run: register this player with default values
+        }
+        // Add any stripes earned from completing banking lessons.
+        let earned = StripeBank.claimPending()
+        if earned != 0 {
+            record.stripes += earned
+            persist()
         }
         await refreshLeaderboard()
     }

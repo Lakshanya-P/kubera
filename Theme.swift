@@ -43,6 +43,60 @@ enum Theme {
     }
 }
 
+// MARK: - Age band (drives how big/wordy lessons are)
+
+enum AgeBand {
+    case young    // ~2nd grade & under: big text, lots of pictures
+    case mid      // ~3rd–5th grade
+    case older    // ~6th grade & up: smaller text, more detail
+
+    /// Numeric level for difficulty tracking (1=young, 2=mid, 3=older).
+    var bandLevel: Int {
+        switch self { case .young: return 1; case .mid: return 2; case .older: return 3 }
+    }
+
+    /// Reads birth year stored when the user first entered their age; auto-advances each year.
+    static var current: AgeBand {
+        let defaults = UserDefaults.standard
+        let currentYear = Calendar.current.component(.year, from: Date())
+        let age: Int
+        if let birthYear = defaults.object(forKey: "survey_birthYear") as? Int {
+            let computed = max(4, currentYear - birthYear)
+            defaults.set(computed, forKey: "survey_age")   // keep display in sync
+            age = computed
+        } else {
+            age = defaults.object(forKey: "survey_age") as? Int ?? 10
+        }
+        if age <= 8 { return .young }
+        else if age <= 11 { return .mid }
+        else { return .older }
+    }
+
+    var titleFont: Font {
+        switch self {
+        case .young: .largeTitle.weight(.heavy)
+        case .mid:   .title.weight(.heavy)
+        case .older: .title2.weight(.heavy)
+        }
+    }
+
+    var bodyFont: Font {
+        switch self {
+        case .young: .title2
+        case .mid:   .title3
+        case .older: .body
+        }
+    }
+
+    var emojiSize: CGFloat {
+        switch self {
+        case .young: 88
+        case .mid:   68
+        case .older: 52
+        }
+    }
+}
+
 // MARK: - App background
 
 /// The full-bleed photo background for a screen. Each screen passes its own
@@ -88,6 +142,7 @@ struct CenteredScrollView<Content: View>: View {
                     .padding(.horizontal, Theme.Space.l)
                     .padding(.vertical, Theme.Space.l)
             }
+            .scrollDismissesKeyboard(.interactively)
         }
     }
 }
